@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Guia Curvas</title>
+    <style>
+        body { margin: 0; }
+    </style>
+</head>
+<body>
+<!-- Three.js library -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.115.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.115.0/examples/js/libs/inflate.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.115.0/examples/js/loaders/FBXLoader.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.115.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+    const renderer = new THREE.WebGLRenderer();
+    const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 1000);
+    const scene = new THREE.Scene();
+    let Mesh;
+    let light;
+    let mixer;
+    const clock = new THREE.Clock();
+    function init() {
+        scene.background = new THREE.Color('black');
+        camera.position.set(200, 100, 100);
+        controls = new THREE.OrbitControls( camera, renderer.domElement );
+        controls.target.set( 0, 100, 0 );
+        controls.update();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+    }
+
+    function setLight() {
+        light = new THREE.AmbientLight(0xff00ff); // soft white light
+        scene.add(light);
+    }
+
+    function loadGLTF() {
+        const loader = new THREE.FBXLoader();
+        loader.load( 'Breakdance 1990 (1).fbx', function ( object ) {
+            mixer = new THREE.AnimationMixer( object );
+            const action = mixer.clipAction( object.animations[ 0 ] );
+            action.play();
+            object.traverse( function ( child ) {
+                if ( child.isMesh ) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                }
+            } );
+            object.scale.set(0.2, 0.2, 0.2);
+            scene.add( object );
+        } );
+
+    }
+    function animate() {
+        requestAnimationFrame( animate );
+        const delta = clock.getDelta();
+        if ( mixer ) mixer.update( delta );
+        renderer.render( scene, camera );
+    }
+
+    init();
+    setLight();
+    loadGLTF();
+    animate();
+    
+</script>
+</body>
+</html>
